@@ -92,11 +92,13 @@ def search_business_contact(business_name, business_address):
         }
 
     query = (
-        "official website "
+        '"'
         + business_name
-        + " "
+        + '" '
+        + '"'
         + business_address
-        + " Chicago"
+        + '" '
+        + '"official website"'
     )
 
     payload = {
