@@ -329,7 +329,75 @@ def search_business_contact(business_name, business_address):
         "email": "",
         "source": source
     }
+    
+# =========================================================
+# HELPER: FIND PUBLIC CONTACT INFO ON COMPANY WEBSITE
+# =========================================================
 
+def extract_website_contact_info(website):
+
+    if not website:
+        return {
+            "phone": "",
+            "email": ""
+        }
+
+    try:
+        request = urllib.request.Request(
+            website,
+            headers={
+                "User-Agent": "ChicagoPermitTracker/1.0"
+            }
+        )
+
+        response = urllib.request.urlopen(
+            request,
+            timeout=20
+        )
+
+        html = response.read().decode(
+            "utf-8",
+            errors="ignore"
+        )
+
+    except Exception as error:
+
+        print(
+            "    Website lookup error:",
+            error
+        )
+
+        return {
+            "phone": "",
+            "email": ""
+        }
+
+    # Look for a public business email address.
+    email_match = re.search(
+        r'[\w.+-]+@[\w-]+\.[\w.-]+',
+        html
+    )
+
+    email = ""
+
+    if email_match:
+        email = email_match.group(0)
+
+    # Look for a phone number.
+    phone_match = re.search(
+        r'(?:\+1[\s.-]?)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}',
+        html
+    )
+
+    phone = ""
+
+    if phone_match:
+        phone = phone_match.group(0)
+
+    return {
+        "phone": phone,
+        "email": email
+    }
 
 # =========================================================
 # HELPER: FIND BUSINESS LICENSE
@@ -747,31 +815,20 @@ if new_permits:
                     business_address
                 )
 
-                business_website = contact_info.get(
+                                business_website = contact_info.get(
                     "website",
                     ""
                 )
 
-                business_phone = contact_info.get(
-                    "phone",
-                    ""
+                website_contact = extract_website_contact_info(
+                    business_website
                 )
 
-                business_email = contact_info.get(
-                    "email",
-                    ""
-                )
+                if website_contact.get("phone"):
+                    contact_info["phone"] = website_contact["phone"]
 
-                contact_source = contact_info.get(
-                    "source",
-                    ""
-                )
-
-                if business_website:
-                    print(
-                        "    Website:",
-                        business_website
-                    )
+                if website_contact.get("email"):
+                    contact_info["email"] = website_contact["email"]
 
                 business_phone = contact_info.get(
                     "phone",
