@@ -20,6 +20,7 @@ LICENSE_API = "https://data.cityofchicago.org/resource/r5kz-chrr.json"
 OWNER_API = "https://data.cityofchicago.org/resource/ezma-pppn.json"
 
 MEMORY_FILE = "seen_ids.txt"
+TAVILY_API = "https://api.tavily.com/search"
 
 
 # =========================================================
@@ -73,7 +74,122 @@ def clean_name(name):
 
     return " ".join(words)
 
+# =========================================================
+# HELPER: SEARCH THE WEB FOR BUSINESS CONTACT INFO
+# =========================================================
 
+def search_business_contact(business_name, business_address):
+
+    api_key = os.environ.get("TAVILY_API_KEY")
+
+    if not api_key:
+        print("    Tavily API key not available.")
+        return {
+            "website": "",
+            "phone": "",
+            "email": "",
+            "source": ""
+        }
+
+    query = (
+        business_name
+        + " "
+        + business_address
+        + " Chicago"
+    )
+
+    payload = {
+        "api_key": api_key,
+        "query": query,
+        "search_depth": "basic",
+        "max_results": 5,
+        "include_answer": False
+    }
+
+    data = json.dumps(payload).encode("utf-8")
+
+    request = urllib.request.Request(
+        TAVILY_API,
+        data=data,
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "ChicagoPermitTracker/1.0"
+        },
+        method="POST"
+    )
+
+    try:
+
+        response = urllib.request.urlopen(
+            request,
+            timeout=60
+        )
+
+        results = json.loads(
+            response.read().decode("utf-8")
+        )
+
+    except Exception as error:
+
+        print(
+            "    Tavily search error:",
+            error
+        )
+
+        return {
+            "website": "",
+            "phone": "",
+            "email": "",
+            "source": ""
+        }
+
+    website = ""
+    source = ""
+
+    for result in results.get("results", []):
+
+        url = result.get("url", "")
+
+        if not url:
+            continue
+
+        # Prefer results that look like the company's
+        # own website rather than directories.
+
+        title = result.get(
+            "title",
+            ""
+        ).lower()
+
+        content = result.get(
+            "content",
+            ""
+        ).lower()
+
+        business_words = (
+            business_name
+            .lower()
+            .replace(",", "")
+            .replace(".", "")
+        )
+
+        if (
+            business_words.split()[0]
+            in title
+            or business_words.split()[0]
+            in content
+        ):
+
+            website = url
+            source = url
+            break
+
+    return {
+        "website": website,
+        "phone": "",
+        "email": "",
+        "source": source
+    }
 # =========================================================
 # HELPER: FIND BUSINESS LICENSE
 # =========================================================
@@ -403,6 +519,11 @@ if new_permits:
             business_city = ""
             business_state = ""
             business_zip = ""
+            
+            business_website = ""
+            business_phone = ""
+            business_email = ""
+            contact_source = ""
 
             owner_names = []
             owner_titles = []
@@ -457,6 +578,36 @@ if new_permits:
                     "    Account:",
                     business_account
                 )
+                                contact_info = search_business_contact(
+                    business_name,
+                    business_address
+                )
+
+                business_website = contact_info.get(
+                    "website",
+                    ""
+                )
+
+                business_phone = contact_info.get(
+                    "phone",
+                    ""
+                )
+
+                business_email = contact_info.get(
+                    "email",
+                    ""
+                )
+
+                contact_source = contact_info.get(
+                    "source",
+                    ""
+                )
+
+                if business_website:
+                    print(
+                        "    Website:",
+                        business_website
+                    )
 
                 owners = find_owner(
                     business_account
@@ -575,6 +726,18 @@ if new_permits:
 
                 "business_zip":
                     business_zip,
+                
+                "business_website":
+                    business_website,
+
+                "business_phone":
+                    business_phone,
+
+                "business_email":
+                    business_email,
+
+                "contact_source":
+                    contact_source,
 
                 "business_owner":
                     "; ".join(
@@ -632,6 +795,11 @@ if new_permits:
         "business_city",
         "business_state",
         "business_zip",
+        
+        "business_website",
+        "business_phone",
+        "business_email",
+        "contact_source",
 
         "business_owner",
         "owner_title",
