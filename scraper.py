@@ -311,7 +311,30 @@ def find_owner(account_number):
 
         return []
 
+# =========================================================
+# TEMPORARY TAVILY TEST
+# =========================================================
 
+print()
+print("Testing Tavily business search...")
+
+test_contact = search_business_contact(
+    "LEEWAY WRECKING INC",
+    "4709 W KINZIE ST CHICAGO IL 60644"
+)
+
+print(
+    "Tavily website:",
+    test_contact.get("website", "")
+)
+
+print(
+    "Tavily source:",
+    test_contact.get("source", "")
+)
+
+print("Tavily test complete.")
+print()
 # =========================================================
 # DOWNLOAD DEMOLITION PERMITS
 # =========================================================
