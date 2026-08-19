@@ -953,6 +953,10 @@ if new_permits:
                     "; ".join(
                         property_owners
                     ),
+                "lead_type":
+                    "PROPERTY_OWNER"
+                    if property_owners
+                    else "",
 
                 "contractor_name":
                     contractor_name,
@@ -1039,6 +1043,7 @@ if new_permits:
         "work_description",
 
         "property_owner",
+        "lead_type",
 
         "contractor_name",
         "contractor_type",
