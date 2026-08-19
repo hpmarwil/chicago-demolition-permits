@@ -815,7 +815,7 @@ if new_permits:
                     business_address
                 )
 
-                                business_website = contact_info.get(
+                business_website = contact_info.get(
                     "website",
                     ""
                 )
