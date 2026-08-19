@@ -578,7 +578,7 @@ if new_permits:
                     "    Account:",
                     business_account
                 )
-                                contact_info = search_business_contact(
+                contact_info = search_business_contact(
                     business_name,
                     business_address
                 )
@@ -587,6 +587,27 @@ if new_permits:
                     "website",
                     ""
                 )
+
+                business_phone = contact_info.get(
+                    "phone",
+                    ""
+                )
+
+                business_email = contact_info.get(
+                    "email",
+                    ""
+                )
+
+                contact_source = contact_info.get(
+                    "source",
+                    ""
+                )
+
+                if business_website:
+                    print(
+                        "    Website:",
+                        business_website
+                    )
 
                 business_phone = contact_info.get(
                     "phone",
