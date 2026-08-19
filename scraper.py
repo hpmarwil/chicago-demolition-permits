@@ -21,7 +21,12 @@ OWNER_API = "https://data.cityofchicago.org/resource/ezma-pppn.json"
 
 MEMORY_FILE = "seen_ids.txt"
 TAVILY_API = "https://api.tavily.com/search"
+# =========================================================
+# TEST MODE
+# =========================================================
 
+TEST_MODE = False
+TEST_PERMIT_COUNT = 50
 
 # =========================================================
 # HELPER: CALL A CHICAGO API
@@ -562,7 +567,20 @@ print()
 
 print("Connecting to Chicago's permit database...")
 
-permits = get_json(PERMIT_API)
+if TEST_MODE:
+
+    test_api = (
+        "https://data.cityofchicago.org/resource/e4xk-pud8.json"
+        "?$limit="
+        + str(TEST_PERMIT_COUNT)
+        + "&$order=permit_%20DESC"
+    )
+
+    permits = get_json(test_api)
+
+else:
+
+    permits = get_json(PERMIT_API)
 
 print(
     "Downloaded",
@@ -603,20 +621,32 @@ print(
 # =========================================================
 
 # =========================================================
-# TEMPORARY TEST: PROCESS THE 50 MOST RECENT PERMITS
+# SELECT PERMITS TO PROCESS
 # =========================================================
 
-new_permits = []
+if TEST_MODE:
 
-for permit in permits:
+    new_permits = permits.copy()
 
-    permit_id = permit.get("id")
+    print(
+        "TEST MODE: Processing",
+        len(new_permits),
+        "permits."
+    )
 
-    if permit_id and permit_id not in seen_ids:
+else:
 
-        new_permits.append(permit)
+    new_permits = []
 
-        seen_ids.add(permit_id)
+    for permit in permits:
+
+        permit_id = permit.get("id")
+
+        if permit_id and permit_id not in seen_ids:
+
+            new_permits.append(permit)
+
+            seen_ids.add(permit_id)
 
 
 print(
@@ -631,11 +661,21 @@ print(
 
 if new_permits:
 
-    filename = (
-        "new_permits_"
-        + str(date.today())
-        + ".csv"
-    )
+    if TEST_MODE:
+
+        filename = (
+            "TEST_50_permits_"
+            + str(date.today())
+            + ".csv"
+        )
+
+    else:
+
+        filename = (
+            "new_permits_"
+            + str(date.today())
+            + ".csv"
+        )
 
     output_rows = []
 
@@ -646,7 +686,6 @@ if new_permits:
             "Processing permit:",
             permit.get("permit_", "")
         )
-
         # -------------------------------------------------
         # Basic permit information
         # -------------------------------------------------
