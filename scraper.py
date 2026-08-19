@@ -1,12 +1,135 @@
 import urllib.request
 import urllib.parse
+import smtplib
+from email.message import EmailMessage
 import json
 import csv
 import os
 import re
 from datetime import date
 
+# =========================================================
+# SEND EMAIL REPORT
+# =========================================================
 
+def send_email_report(filename, output_rows):
+
+    gmail_username = os.environ.get(
+        "GMAIL_USERNAME"
+    )
+
+    gmail_password = os.environ.get(
+        "GMAIL_APP_PASSWORD"
+    )
+
+    gmail_recipient = os.environ.get(
+        "GMAIL_RECIPIENT"
+    )
+
+    if not gmail_username:
+        print(
+            "    Gmail username not available."
+        )
+        return
+
+    if not gmail_password:
+        print(
+            "    Gmail app password not available."
+        )
+        return
+
+    if not gmail_recipient:
+        print(
+            "    Gmail recipient not available."
+        )
+        return
+
+    permit_count = len(output_rows)
+
+    subject = (
+        "Chicago Demolition Permits — "
+        + str(permit_count)
+        + " New Permit"
+        + ("s" if permit_count != 1 else "")
+        + " — "
+        + str(date.today())
+    )
+
+    body_lines = [
+        "Good morning,",
+        "",
+        "The Chicago Demolition Permit Tracker found "
+        + str(permit_count)
+        + " new permit"
+        + ("s" if permit_count != 1 else "")
+        + ".",
+        "",
+        "The complete CSV report is attached.",
+        "",
+        "The report includes:",
+        "- Property owner",
+        "- Contractor",
+        "- Contractor business owner",
+        "- Official website",
+        "- Business phone",
+        "- Business email",
+        "",
+        "Chicago Demolition Permit Tracker"
+    ]
+
+    message = EmailMessage()
+
+    message["Subject"] = subject
+    message["From"] = gmail_username
+    message["To"] = gmail_recipient
+
+    message.set_content(
+        "\n".join(body_lines)
+    )
+
+    try:
+
+        with open(
+            filename,
+            "rb"
+        ) as file:
+
+            file_data = file.read()
+
+        message.add_attachment(
+            file_data,
+            maintype="text",
+            subtype="csv",
+            filename=os.path.basename(filename)
+        )
+
+        with smtplib.SMTP(
+            "smtp.gmail.com",
+            587
+        ) as server:
+
+            server.starttls()
+
+            server.login(
+                gmail_username,
+                gmail_password
+            )
+
+            server.send_message(
+                message
+            )
+
+        print(
+            "    Email report sent to:",
+            gmail_recipient
+        )
+
+    except Exception as error:
+
+        print(
+            "    Email sending error:",
+            error
+        )
 # =========================================================
 # SETTINGS
 # =========================================================
@@ -1139,7 +1262,11 @@ if new_permits:
         "Saved:",
         filename
     )
-
+    
+    send_email_report(
+        filename,
+        output_rows
+    )
 else:
 
     print(
