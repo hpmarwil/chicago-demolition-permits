@@ -92,12 +92,12 @@ def search_business_contact(business_name, business_address):
         }
 
     query = (
-    "official website "
-    + business_name
-    + " "
-    + business_address
-    + " Chicago"
-)
+        "official website "
+        + business_name
+        + " "
+        + business_address
+        + " Chicago"
+    )
 
     payload = {
         "api_key": api_key,
@@ -146,44 +146,162 @@ def search_business_contact(business_name, business_address):
 
     website = ""
     source = ""
+    best_score = -999
+
+    bad_domains = [
+        "mapquest.com",
+        "blackdirectory.com",
+        "buildzoom.com",
+        "junkyardslist.com",
+        "yelp.com",
+        "yellowpages.com",
+        "bbb.org",
+        "angi.com",
+        "homeadvisor.com",
+        "facebook.com",
+        "linkedin.com",
+        "instagram.com",
+        "chamberofcommerce.com",
+        "manta.com",
+        "superpages.com"
+    ]
+
+    business_words = set(
+        business_name.lower()
+        .replace(",", "")
+        .replace(".", "")
+        .replace("-", " ")
+        .split()
+    )
+    address_words = (
+        business_address
+        .lower()
+        .replace(",", "")
+        .split()
+    )
 
     for result in results.get("results", []):
 
         url = result.get("url", "")
 
-        if not url:
-            continue
-
-        # Prefer results that look like the company's
-        # own website rather than directories.
-
         title = result.get(
             "title",
             ""
-        ).lower()
+        )
 
         content = result.get(
             "content",
             ""
-        ).lower()
-
-        business_words = (
-            business_name
-            .lower()
-            .replace(",", "")
-            .replace(".", "")
         )
 
+        if not url:
+            continue
+
+        score = 0
+
+        url_lower = url.lower()
+
+        title_lower = title.lower()
+
+        content_lower = content.lower()
+
+        # -------------------------------------------------
+        # Penalize known directories
+        # -------------------------------------------------
+
+        for domain in bad_domains:
+
+            if domain in url_lower:
+
+                score -= 20
+
+        # -------------------------------------------------
+        # Look at the business name
+        # -------------------------------------------------
+
+        for word in business_words:
+
+            if len(word) >= 4:
+
+                if word in title_lower:
+                    score += 5
+
+                if word in url_lower:
+                    score += 4
+
+                if word in content_lower:
+                    score += 2
+
+        # -------------------------------------------------
+        # Look for the business address
+        # -------------------------------------------------
+
+
+        for word in address_words:
+
+            if len(word) >= 4:
+
+                if word in content_lower:
+
+                    score += 3
+
+        # -------------------------------------------------
+        # Prefer normal company websites
+        # -------------------------------------------------
+
         if (
-            business_words.split()[0]
-            in title
-            or business_words.split()[0]
-            in content
+            ".com" in url_lower
+            or ".net" in url_lower
+            or ".org" in url_lower
         ):
 
+            score += 2
+
+        # -------------------------------------------------
+        # Penalize obvious directory language
+        # -------------------------------------------------
+
+        directory_words = [
+            "directory",
+            "listing",
+            "listings",
+            "reviews",
+            "yellow pages",
+            "mapquest",
+            "contractor directory",
+            "business directory"
+        ]
+
+        for word in directory_words:
+
+            if word in title_lower:
+
+                score -= 10
+
+        # -------------------------------------------------
+        # Keep the highest-scoring result
+        # -------------------------------------------------
+
+        if score > best_score:
+
+            best_score = score
+
             website = url
+
             source = url
-            break
+
+            print(
+                "    Candidate website:",
+                url,
+                "Score:",
+                score
+            )
+    print(
+        "    Selected website:",
+        website,
+        "Score:",
+        best_score
+    )
 
     return {
         "website": website,
@@ -191,6 +309,8 @@ def search_business_contact(business_name, business_address):
         "email": "",
         "source": source
     }
+
+
 # =========================================================
 # HELPER: FIND BUSINESS LICENSE
 # =========================================================
