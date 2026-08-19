@@ -569,7 +569,13 @@ print(
     len(permits),
     "permits"
 )
-
+print(
+    "TEST FIRST 5 PERMITS:",
+    [
+        permit.get("permit_", "")
+        for permit in permits[:5]
+    ]
+)
 # =========================================================
 # LOAD MEMORY
 # =========================================================
