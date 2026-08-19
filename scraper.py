@@ -25,7 +25,14 @@ TAVILY_API = "https://api.tavily.com/search"
 # TEST MODE
 # =========================================================
 
-TEST_MODE = False
+TEST_MODE = (
+    os.environ.get(
+        "TEST_MODE",
+        "false"
+    ).lower()
+    == "true"
+)
+
 TEST_PERMIT_COUNT = 50
 
 # =========================================================
