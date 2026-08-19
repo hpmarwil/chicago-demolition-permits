@@ -92,11 +92,12 @@ def search_business_contact(business_name, business_address):
         }
 
     query = (
-        business_name
-        + " "
-        + business_address
-        + " Chicago"
-    )
+    "official website "
+    + business_name
+    + " "
+    + business_address
+    + " Chicago"
+)
 
     payload = {
         "api_key": api_key,
