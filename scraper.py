@@ -541,7 +541,19 @@ print(
     "Tavily source:",
     test_contact.get("source", "")
 )
+website_contact = extract_website_contact_info(
+    test_contact.get("website", "")
+    )
 
+print(
+    "Tavily phone:",
+    website_contact.get("phone", "")
+    )
+
+print(
+    "Tavily email:",
+    website_contact.get("email", "")
+    )
 print("Tavily test complete.")
 print()
 # =========================================================
