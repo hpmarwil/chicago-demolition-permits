@@ -21,9 +21,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
-
-      - name: Run the scraper
+          
+      - name: Run scraper
+        env: 
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
         run: python scraper.py
+      
 
       - name: Save updated files
         run: |
