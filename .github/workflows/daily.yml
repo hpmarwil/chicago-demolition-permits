@@ -5,7 +5,12 @@ on:
     - cron: '15 7 * * *'
       timezone: "America/Chicago"
   workflow_dispatch:
-
+    inputs:
+      test_mode:
+        description: "Run the latest 50 permits as a test"
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: write
 
@@ -23,8 +28,9 @@ jobs:
           python-version: '3.14'
           
       - name: Run scraper
-        env: 
+        env:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          TEST_MODE: ${{ inputs.test_mode }}
         run: python scraper.py
       
 
