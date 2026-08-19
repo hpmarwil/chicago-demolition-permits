@@ -104,9 +104,28 @@ def search_business_contact(business_name, business_address):
     payload = {
         "api_key": api_key,
         "query": query,
-        "search_depth": "basic",
-        "max_results": 5,
-        "include_answer": False
+        "search_depth": "advanced",
+        "max_results": 10,
+        "include_answer": False,
+        "exclude_domains": [
+            "mapquest.com",
+            "birdeye.com",
+            "blackdirectory.com",
+            "buildzoom.com",
+            "junkyardslist.com",
+            "yelp.com",
+            "yellowpages.com",
+            "bbb.org",
+            "angi.com",
+            "homeadvisor.com",
+            "facebook.com",
+            "linkedin.com",
+            "instagram.com",
+            "chamberofcommerce.com",
+            "manta.com",
+            "superpages.com"
+        ]
+    }
     }
 
     data = json.dumps(payload).encode("utf-8")
