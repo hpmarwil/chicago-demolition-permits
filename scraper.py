@@ -14,6 +14,7 @@ from datetime import date
 PERMIT_API = (
     "https://data.cityofchicago.org/resource/e4xk-pud8.json"
     "?$limit=50"
+    "&$order=permit_ DESC"
 )
 
 LICENSE_API = "https://data.cityofchicago.org/resource/r5kz-chrr.json"
@@ -569,13 +570,7 @@ print(
     len(permits),
     "permits"
 )
-print(
-    "TEST FIRST 5 PERMITS:",
-    [
-        permit.get("permit_", "")
-        for permit in permits[:5]
-    ]
-)
+
 # =========================================================
 # LOAD MEMORY
 # =========================================================
@@ -608,19 +603,17 @@ print(
 # FIND NEW PERMITS
 # =========================================================
 
-new_permits = []
+# =========================================================
+# TEMPORARY TEST: PROCESS THE 50 MOST RECENT PERMITS
+# =========================================================
 
-for permit in permits:
+new_permits = permits.copy()
 
-    permit_id = permit.get("id")
-
-    if permit_id and permit_id not in seen_ids:
-
-        new_permits.append(permit)
-
-        seen_ids.add(permit_id)
-
-
+print(
+    "TEST MODE: Processing",
+    len(new_permits),
+    "permits."
+)
 print(
     "New permits:",
     len(new_permits)
