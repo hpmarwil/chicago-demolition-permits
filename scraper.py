@@ -13,7 +13,7 @@ from datetime import date
 
 PERMIT_API = (
     "https://data.cityofchicago.org/resource/e4xk-pud8.json"
-    "?$limit=50000"
+    "?$limit=50"
 )
 
 LICENSE_API = "https://data.cityofchicago.org/resource/r5kz-chrr.json"
@@ -569,35 +569,7 @@ print(
     len(permits),
     "permits"
 )
-# =========================================================
-# TEMPORARY TEST: PROCESS 50 MOST RECENT PERMITS
-# =========================================================
 
-def permit_date(permit):
-
-    date_value = (
-        permit.get("permit_")
-        or permit.get("issue_date")
-        or permit.get("application_start_date")
-        or ""
-    )
-
-    return date_value
-
-
-permits = sorted(
-    permits,
-    key=permit_date,
-    reverse=True
-)[:50]
-
-print(
-    "TEST MODE: Using the 50 most recent permits."
-)
-print(
-    "TEST: Most recent permit sample:",
-    permits[0]
-)
 # =========================================================
 # LOAD MEMORY
 # =========================================================
