@@ -126,7 +126,6 @@ def search_business_contact(business_name, business_address):
             "superpages.com"
         ]
     }
-    }
 
     data = json.dumps(payload).encode("utf-8")
 
