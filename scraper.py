@@ -14,7 +14,7 @@ from datetime import date
 PERMIT_API = (
     "https://data.cityofchicago.org/resource/e4xk-pud8.json"
     "?$limit=50"
-    "&$order=permit_ DESC"
+    "&$order=permit_%20DESC"
 )
 
 LICENSE_API = "https://data.cityofchicago.org/resource/r5kz-chrr.json"
